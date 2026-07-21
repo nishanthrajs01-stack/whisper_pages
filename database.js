@@ -225,5 +225,15 @@ export async function initDb() {
     )
   `);
 
+  // Ensure the virtual master admin account exists in accounts table to pass foreign key constraints
+  const adminAccount = await dbQuery.get("SELECT 1 FROM accounts WHERE id = 'admin_master'");
+  if (!adminAccount) {
+    const now = new Date().toISOString();
+    await dbQuery.run(
+      "INSERT INTO accounts (id, pen_name, password_hash, age_bracket, created_at, last_active_at, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      ['admin_master', 'Admin Master', 'admin_virtual_placeholder', '50_plus', now, now, '127.0.0.1']
+    );
+  }
+
   console.log('Database tables successfully initialized.');
 }

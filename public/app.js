@@ -1393,6 +1393,9 @@ async function loadAdminTab(tab) {
                 Last Active: ${res.user.last_active_at}<br/>
                 Status: ${res.user.status}
               </p>
+              ${res.user.id !== 'admin_master' ? `
+                <button class="btn btn-danger btn-sm" style="margin-top: 12px; width: 100%; border-radius: 4px;" onclick="adminAction('account', '${res.user.id}', 'remove', '')">Delete Pen Name Account (IRREVERSIBLE)</button>
+              ` : ''}
             </div>
           `;
         } catch (err) {
@@ -1546,7 +1549,11 @@ window.adminAction = async function(target_type, target_id, action, report_id) {
       body: JSON.stringify({ target_type, target_id, action, report_id })
     });
     showToast(`Moderation action completed: ${action}`, 'success');
-    loadAdminTab('moderation');
+    if (target_type === 'account') {
+      loadAdminTab('lookup');
+    } else {
+      loadAdminTab('moderation');
+    }
   } catch (err) {
     showToast(err.message, 'error');
   }

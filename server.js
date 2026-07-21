@@ -791,15 +791,21 @@ app.post('/api/admin/action', requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Missing moderation params.' });
   }
 
-  const tableMap = { post: 'posts', comment: 'comments', wall_post: 'wall_posts' };
+  const tableMap = { post: 'posts', comment: 'comments', wall_post: 'wall_posts', account: 'accounts' };
   const tbl = tableMap[target_type];
   if (!tbl) return res.status(400).json({ error: 'Invalid target type.' });
 
   if (action === 'hide') {
+    if (target_type === 'account') {
+      return res.status(400).json({ error: 'Cannot hide accounts. Use remove to delete.' });
+    }
     const statusVal = target_type === 'post' ? 'hidden' : 'hidden';
     await dbQuery.run(`UPDATE ${tbl} SET status = 'hidden' WHERE id = ?`, [target_id]);
     await logAdminAction(req.user.id, 'hide_content', target_id, { target_type });
   } else if (action === 'restore') {
+    if (target_type === 'account') {
+      return res.status(400).json({ error: 'Cannot restore accounts. Use remove to delete.' });
+    }
     const statusVal = target_type === 'post' ? 'published' : 'visible';
     await dbQuery.run(`UPDATE ${tbl} SET status = ?, report_count = 0 WHERE id = ?`, [statusVal, target_id]);
     await logAdminAction(req.user.id, 'restore_content', target_id, { target_type });
