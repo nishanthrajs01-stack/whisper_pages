@@ -1142,7 +1142,7 @@ function renderSignup() {
             </label>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block" id="signup-submit-btn" disabled>Claim Pen Name</button>
+          <button type="submit" class="btn btn-primary btn-block" id="signup-submit-btn">Claim Pen Name</button>
         </form>
 
         <p class="text-center" style="margin-top: 18px; font-size: 13px;">
@@ -1155,7 +1155,6 @@ function renderSignup() {
   const passwordInput = document.getElementById('signup-password');
   const meterFill = document.getElementById('strength-meter-fill');
   const meterText = document.getElementById('strength-meter-text');
-  const submitBtn = document.getElementById('signup-submit-btn');
   const ackCheck = document.getElementById('signup-ack-recovery');
 
   passwordInput.addEventListener('input', debounce(async () => {
@@ -1165,7 +1164,6 @@ function renderSignup() {
       meterFill.style.width = '0';
       meterText.innerText = 'Strength: Empty';
       meterText.className = 'password-meter-text';
-      validateSignupButton();
       return;
     }
 
@@ -1192,34 +1190,44 @@ function renderSignup() {
           meterText.innerText = 'Strength: Strong (Secure)';
         }
       }
-      validateSignupButton(res.score !== 'weak' && !res.blocklisted);
     } catch (e) {
       console.error(e);
     }
   }, 300));
 
   ackCheck.addEventListener('change', () => {
-    validateSignupButton();
+    // Deprecated state handler
   });
-
-  function validateSignupButton(validStrength = false) {
-    const pwd = passwordInput.value;
-    const meetsComplexity = pwd.length >= 10 && /[a-zA-Z]/.test(pwd) && /\d/.test(pwd) && /[!@#$%^&*()_+\-=\[\]{};':",\\|.<>\/?~`]/.test(pwd);
-    const isAcked = ackCheck.checked;
-    const isBlocklisted = meterText.classList.contains('blocklisted');
-    
-    if (meetsComplexity && isAcked && !isBlocklisted) {
-      submitBtn.removeAttribute('disabled');
-    } else {
-      submitBtn.setAttribute('disabled', 'true');
-    }
-  }
 
   document.getElementById('signup-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = document.getElementById('signup-username').value;
+    const username = document.getElementById('signup-username').value.trim();
     const password = passwordInput.value;
     const age_bracket = document.getElementById('signup-age').value;
+    const isAcked = ackCheck.checked;
+
+    if (!isAcked) {
+      alert('⚠️ Acknowledgment Required:\nYou must check the checkbox acknowledging that there is no password recovery option to proceed.');
+      return;
+    }
+
+    const meetsComplexity = password.length >= 10 && /[a-zA-Z]/.test(password) && /\d/.test(password) && /[!@#$%^&*()_+\-=\[\]{};':",\\|.<>\/?~`]/.test(password);
+    const isBlocklisted = meterText.classList.contains('blocklisted');
+
+    if (isBlocklisted) {
+      alert('⚠️ Password Blocked:\nThis password is too common or has been flagged in global data breaches. Please choose a different, more unique password.');
+      return;
+    }
+
+    if (!meetsComplexity) {
+      alert('⚠️ Weak Password:\nYour password is not secure enough. To secure your anonymous account, it must:\n- Be at least 10 characters long\n- Contain at least one letter\n- Contain at least one number\n- Contain at least one symbol');
+      return;
+    }
+
+    if (!age_bracket) {
+      alert('⚠️ Age Bracket Required:\nPlease select your self-declared age bracket to complete signup.');
+      return;
+    }
 
     try {
       const res = await apiFetch('/api/auth/signup', {

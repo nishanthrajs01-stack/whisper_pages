@@ -579,6 +579,15 @@ app.post('/api/posts/:id/comments', requireAuth, async (req, res) => {
     return res.status(403).json({ error: 'Comments from adult accounts are restricted on this minor writer\'s post.' });
   }
 
+  // Prevent duplicate comments (same author, same post, same content)
+  const duplicate = await dbQuery.get(
+    "SELECT 1 FROM comments WHERE post_id = ? AND author_id = ? AND content = ? AND status = 'visible'",
+    [id, req.user.id, content.trim()]
+  );
+  if (duplicate) {
+    return res.status(400).json({ error: 'Duplicate comment detected. You have already posted this exact comment.' });
+  }
+
   const commentId = 'com_' + Math.random().toString(36).substr(2, 9);
   const now = new Date().toISOString();
 
