@@ -819,20 +819,81 @@ footer {
 
 .text-center { text-align: center; }
 .hidden { display: none !important; }
+/* Mobile Navigation Hamburger */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 101;
+}
+.nav-toggle span {
+  width: 100%;
+  height: 2px;
+  background-color: var(--ink);
+  transition: all 0.3s ease;
+}
+
+/* Open states for hamburger icon animation */
+.nav-toggle.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.nav-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+.nav-toggle.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
 
 /* Responsive Layout Queries for Mobile & Tablets (iOS, Android) */
 @media (max-width: 768px) {
   /* Navigation wraps gracefully */
   nav {
-    padding: 14px 20px;
-    flex-direction: column;
-    gap: 12px;
+    padding: 16px 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  .nav-toggle {
+    display: flex;
   }
   .navlinks {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+    align-items: stretch;
+    box-shadow: 0 8px 24px rgba(51, 43, 57, 0.08);
+    display: none;
+  }
+  .navlinks.open {
+    display: flex;
+    z-index: 100;
+  }
+  .navlinks a {
     width: 100%;
     justify-content: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+  }
+  .navlinks button {
+    width: 100%;
+  }
+  .navlinks span {
+    text-align: center;
+    display: block;
+    padding: 4px 0;
   }
   
   /* Hero title wraps nicely */

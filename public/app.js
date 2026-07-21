@@ -72,6 +72,16 @@ async function initApp() {
   initFeedbackWidget();
   initGuidelinesModal();
   
+  // Mobile Nav Drawer Toggle
+  const navToggleBtn = document.getElementById('nav-toggle-btn');
+  const mainNav = document.getElementById('main-nav');
+  if (navToggleBtn && mainNav) {
+    navToggleBtn.addEventListener('click', () => {
+      mainNav.classList.toggle('open');
+      navToggleBtn.classList.toggle('active');
+    });
+  }
+
   if (state.token) {
     try {
       const response = await apiFetch('/api/auth/me');
@@ -97,6 +107,12 @@ function router() {
   let viewFn = null;
   let params = {};
   
+  // Close mobile nav drawer on navigation
+  const mainNav = document.getElementById('main-nav');
+  const navToggleBtn = document.getElementById('nav-toggle-btn');
+  if (mainNav) mainNav.classList.remove('open');
+  if (navToggleBtn) navToggleBtn.classList.remove('active');
+
   if (!hash.startsWith('#/publish') && state.autosaveInterval) {
     clearInterval(state.autosaveInterval);
     state.autosaveInterval = null;
