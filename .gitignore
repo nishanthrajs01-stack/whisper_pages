@@ -1,0 +1,10 @@
+node_modules/
+whisper_pages.db
+whisper_pages.db-journal
+.env
+.env.local
+.system_generated/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store

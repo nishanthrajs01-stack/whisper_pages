@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Whisper Pages - A secure, anonymous platform for candid creative writing, poetry, personal stories, and confession walls without identity tracking or profiling.">
+  <title>Whisper Pages — Anonymous Writing & Stories</title>
+  
+  <!-- Final Theme Typography: Fraunces (serif), Inter (sans-serif), IBM Plex Mono (monospace) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <!-- Atmospheric background glow -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Navigation Bar -->
+  <nav id="app-header">
+    <a href="#/" class="logo">whisper<span>pages</span></a>
+    <div class="navlinks" id="main-nav">
+      <!-- Injected dynamically by app.js -->
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content" id="app-root">
+    <!-- Views loaded dynamically here -->
+    <div class="loader-container">
+      <div class="spinner"></div>
+    </div>
+  </main>
+
+  <!-- Global Footer containing Privacy Guarantee and dot trust badge -->
+  <footer id="app-footer">
+    <div class="trust">
+      <span class="dot"></span>
+      No email required. No identity ever linked to your pen name. Inactive accounts deleted after 300 days.
+    </div>
+    <div class="footlinks">
+      <a href="javascript:void(0)" onclick="showGuidelines()">Privacy Policy</a>
+      <a href="javascript:void(0)" onclick="showGuidelines()">Guidelines</a>
+      <a href="#/admin" style="font-family: 'IBM Plex Mono', monospace; font-size:11px;">Admin</a>
+    </div>
+  </footer>
+
+  <!-- Guidelines Overlay Modal (FR-9.4) -->
+  <div class="modal-backdrop hidden" id="guidelines-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 style="font-family: 'Fraunces', serif;">Community Guidelines</h2>
+        <button class="close-btn" id="close-guidelines-btn">&times;</button>
+      </div>
+      <div class="modal-body guidelines-text">
+        <p>Welcome to Whisper Pages. We believe the writing matters, not the writer's identity. To keep this space safe, creative, and anonymous, you must abide by these simple rules:</p>
+        <ul style="margin-left: 20px; margin-bottom: 15px;">
+          <li><strong>Protect Anonymity:</strong> Do not post names, phone numbers, email addresses, or specific physical locations that could expose your own or someone else's identity.</li>
+          <li><strong>Zero Harassment:</strong> Stalking, intimidation, targeted abuse, and harassment are strictly prohibited, particularly on the Shoutout Wall.</li>
+          <li><strong>Age Gating:</strong> Honestly tag mature or 18+ content when publishing. Unrated publishing is blocked.</li>
+          <li><strong>Harmful Content Gating:</strong> Any content related to exploitation, child harm, self-harm instructions, or extreme violence is filtered at submission time and permanently blocked.</li>
+          <li><strong>Report Abuse:</strong> Use the "Report" flag on any content violating guidelines. Items reaching report thresholds are automatically hidden instantly.</li>
+        </ul>
+        <p class="warning-alert">Note: Accounts that remain inactive for 300 days are permanently and irreversibly destroyed, and their pen names are returned to the public pool.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="acknowledge-guidelines-btn">I Understand</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Persistent Feedback Widget (FR-11.1 - 11.3) -->
+  <div class="feedback-widget" id="feedback-widget">
+    <button class="feedback-trigger" id="feedback-trigger-btn">
+      <span class="feedback-icon">✉</span> Feedback
+    </button>
+    
+    <div class="feedback-panel hidden" id="feedback-panel">
+      <div class="feedback-header">
+        <h3 style="font-family: 'Fraunces', serif; font-size: 16px;">Submit Feedback</h3>
+        <button class="feedback-close" id="feedback-panel-close">&times;</button>
+      </div>
+      <form class="feedback-form" id="feedback-form-element">
+        <div class="form-group-row">
+          <label>
+            <input type="radio" name="feedback-category" value="bug" checked> Bug Report
+          </label>
+          <label>
+            <input type="radio" name="feedback-category" value="idea"> Feature Idea
+          </label>
+        </div>
+        <div class="form-group">
+          <textarea id="feedback-content-input" placeholder="Tell us what's on your mind... (Your current page URL context will be auto-captured)" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Send Feedback</button>
+      </form>
+      <div class="feedback-success-msg hidden" id="feedback-success-msg">
+        ✓ Thank you for helping improve Whisper Pages!
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Controller Script -->
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
