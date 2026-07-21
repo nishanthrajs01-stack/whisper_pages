@@ -1,39 +1,102 @@
 import sqlite3 from 'sqlite3';
+import pg from 'pg';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dbPath = process.env.DATABASE_PATH || join(__dirname, 'whisper_pages.db');
 
-// Enable verbose mode for debugging in development
-const sqlite = sqlite3.verbose();
-const db = new sqlite.Database(dbPath);
+const usePostgres = !!process.env.DATABASE_URL;
 
-// Enable foreign keys
-db.serialize(() => {
-  db.run('PRAGMA foreign_keys = ON;');
-});
+let db = null;
+let pool = null;
 
-// Promisified query wrappers
+if (usePostgres) {
+  const { Pool } = pg;
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
+} else {
+  const sqlite = sqlite3.verbose();
+  db = new sqlite.Database(dbPath);
+  db.serialize(() => {
+    db.run('PRAGMA foreign_keys = ON;');
+  });
+}
+
+function convertSql(sql) {
+  let index = 1;
+  return sql.replace(/\?/g, () => `$${index++}`);
+}
+
+// Promisified query wrappers supporting dual engines
 export const dbQuery = {
-  run: (sql, params = []) => new Promise((resolve, reject) => {
-    db.run(sql, params, function(err) {
-      if (err) reject(err);
-      else resolve({ lastID: this.lastID, changes: this.changes });
-    });
-  }),
-  get: (sql, params = []) => new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  }),
-  all: (sql, params = []) => new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  })
+  run: (sql, params = []) => {
+    if (usePostgres) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          if (sql.trim().toUpperCase().startsWith('PRAGMA')) {
+            return resolve({ lastID: null, changes: 0 });
+          }
+          const pgSql = convertSql(sql);
+          const res = await pool.query(pgSql, params);
+          resolve({ lastID: null, changes: res.rowCount });
+        } catch (err) {
+          reject(err);
+        }
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        db.run(sql, params, function(err) {
+          if (err) reject(err);
+          else resolve({ lastID: this.lastID, changes: this.changes });
+        });
+      });
+    }
+  },
+  get: (sql, params = []) => {
+    if (usePostgres) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const pgSql = convertSql(sql);
+          const res = await pool.query(pgSql, params);
+          resolve(res.rows[0] || undefined);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        });
+      });
+    }
+  },
+  all: (sql, params = []) => {
+    if (usePostgres) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const pgSql = convertSql(sql);
+          const res = await pool.query(pgSql, params);
+          resolve(res.rows);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        });
+      });
+    }
+  }
 };
 
 // Initialize Tables

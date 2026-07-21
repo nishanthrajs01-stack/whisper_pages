@@ -889,10 +889,18 @@ app.get('*', (req, res) => {
 });
 
 // Initialise DB and Start server
-initDb().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Whisper Pages Server started on http://localhost:${PORT}`);
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  initDb().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Whisper Pages Server started on http://localhost:${PORT}`);
+    });
+  }).catch(err => {
+    console.error('Database initialisation failed:', err);
   });
-}).catch(err => {
-  console.error('Database initialisation failed:', err);
-});
+} else {
+  initDb().catch(err => {
+    console.error('Database initialisation failed in serverless boot:', err);
+  });
+}
+
+export default app;
